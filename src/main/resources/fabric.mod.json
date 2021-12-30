@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "advancedwild",
+  "version": "${version}",
+
+  "name": "AdvancedWild",
+  "description": "An advanced /wild command",
+  "authors": [
+    "Skyfy16"
+  ],
+  "contact": {},
+
+  "license": "MIT",
+  "icon": "assets/advancedwild/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "ch.skyfy.advancedwild.AdvancedWild"
+    ]
+  },
+  "mixins": [
+    "advancedwild.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.12.12",
+    "fabric": "*",
+    "minecraft": "1.18.x",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
