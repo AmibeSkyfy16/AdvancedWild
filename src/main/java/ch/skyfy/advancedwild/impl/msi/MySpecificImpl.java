@@ -7,6 +7,7 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.nbt.NbtCompound;
@@ -17,6 +18,7 @@ import net.minecraft.util.math.Vec3i;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 
@@ -63,6 +65,7 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
         try {
             var player = context.getSource().getPlayer();
 
+            // If this is the first time the player use /wild
             if (playerWilds.stream().noneMatch(playerWild1 -> playerWild1.uuid.equals(player.getUuidAsString()))) {
                 var range = playerTimeRanges.get(0);
                 var x = randomizer.nextDouble(range.min, range.max + 1);
@@ -79,6 +82,7 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
 
                 // if the player has used as many /wild as there are items in the list
                 if (playerWild.count > playerTimeRanges.size() - 1) {
+                    // If he can continue or not to use /wild
                     if (shouldContinueAfterAllTimeRangeDid) {
                         range = playerTimeRanges.get(playerTimeRanges.size() - 1);
                         previousRange = playerTimeRanges.get(playerTimeRanges.size() - 1 - 1);
@@ -91,6 +95,7 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                     previousRange = playerTimeRanges.get(playerWild.count - 1);
                 }
 
+                // Getting the correct elapsed time
                 Long elapsed;
                 if (mySpecificImplConfig.basedDelay == MySpecificImplConfig.BasedDelay.PLAYER_PLAYTIME_BASED)
                     elapsed = PlayerTimeMeter.getInstance().getTime(playerWild.uuid);
@@ -98,7 +103,14 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                     elapsed = System.currentTimeMillis() - playerWild.startTime;
 
                 if (elapsed < range.delay) {
-                    player.sendMessage(Text.of("You have to wait more bedore use /wild"), false);
+                    var calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(PlayerTimeMeter.getInstance().getTime(playerWild.uuid));
+                    var seconds = calendar.get(Calendar.SECOND);
+                    var minutes = calendar.get(Calendar.MINUTE);
+                    var hours = calendar.get(Calendar.HOUR);
+                    var message = """
+                            You have to wait another %d seconds, %d minutes and %d hours before you can use the /wild command again""";
+                    player.sendMessage(Text.of(message.formatted(seconds, minutes, hours)), false);
                     return Command.SINGLE_SUCCESS;
                 }
 
@@ -115,11 +127,9 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                 player.teleport(vec.getX(), vec.getY(), vec.getZ());
                 savePlayersToNbt(playerWild.uuid);
             }
-
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         }
-
         return Command.SINGLE_SUCCESS;
     }
 
@@ -127,6 +137,11 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
     public void registerEvents() {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             playerWilds.forEach(playerWild -> savePlayersToNbt(playerWild.uuid));
+        });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            playerWilds.stream().filter(playerWild -> playerWild.uuid.equals(handler.getPlayer().getUuidAsString())).findFirst().ifPresent(playerWild -> {
+                savePlayersToNbt(playerWild.uuid);
+            });
         });
     }
 
@@ -141,13 +156,16 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                 foundCorrectRandom = true;
         } while (!foundCorrectRandom);
         System.out.println("previous was : " + previous.min + " / " + previous.max);
-        System.out.println("random are : " + x + "  /  " + z );
+        System.out.println("random are : " + x + "  /  " + z);
         return new Vec3i(x, 320, z);
     }
 
+    /**
+     * For each player connected to the server, we will check if there is a configuration, if true, we load it
+     */
     @SuppressWarnings("ConstantConditions")
     private List<PlayerWild> readPlayersFromNbt() {
-        var file = MOD_CONFIG_DIR.resolve("mySpecificImplData").toFile();
+        var file = MOD_CONFIG_DIR.resolve("mySpecificImplData.dat").toFile();
         if (file.exists()) {
             try {
                 var nbt = NbtIo.read(file);
@@ -169,14 +187,14 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
         var file = MOD_CONFIG_DIR.resolve("mySpecificImplData").toFile();
         playerWilds.stream().filter(playerWild -> playerWild.uuid.equals(uuid)).findFirst().ifPresent(playerWild -> {
             NbtCompound nbt;
-            if(file.exists()){
+            if (file.exists()) {
                 try {
                     nbt = NbtIo.read(file);
                 } catch (IOException e) {
                     e.printStackTrace();
                     return;
                 }
-            }else{
+            } else {
                 nbt = new NbtCompound();
             }
             var data = new NbtCompound();

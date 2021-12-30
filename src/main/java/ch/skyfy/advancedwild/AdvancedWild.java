@@ -2,7 +2,6 @@ package ch.skyfy.advancedwild;
 
 import ch.skyfy.advancedwild.commands.CmdWild;
 import ch.skyfy.advancedwild.feature.PlayerTimeMeter;
-import ch.skyfy.advancedwild.impl.msi.PlayerTimeRange;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@SuppressWarnings("unused")
 public class AdvancedWild implements ModInitializer {
 
     public static AtomicBoolean DISABLED = new AtomicBoolean(false);
@@ -28,16 +28,20 @@ public class AdvancedWild implements ModInitializer {
         if (createConfigDir()) return;
         Configurator.initialize();
         PlayerTimeMeter.initialize();
-        if(DISABLED.get())return; // If an error occured in Configurator.initialize() DISABLED will be true, and mod will don't run anymore
+        if (DISABLED.get())
+            return; // If an error occured in Configurator.initialize() DISABLED will be true, and mod will don't run anymore
         registerCommand();
         registerEvents();
     }
 
-    public void registerEvents(){
+    public void registerEvents() {
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if(!playersConnected.contains(handler.player.getUuidAsString())){
+            if (!playersConnected.contains(handler.player.getUuidAsString())) {
                 playersConnected.add(handler.player.getUuidAsString());
             }
+        });
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+            playersConnected.removeIf(uuid -> uuid.equals(handler.player.getUuidAsString()));
         });
     }
 

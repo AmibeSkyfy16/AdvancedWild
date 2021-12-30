@@ -1,8 +1,15 @@
 package ch.skyfy.advancedwild;
 
-public record AdvancedWildConfig(String typeImpl) {
+public final class AdvancedWildConfig {
     private static final String defaultTypeImpl = "MySpecificImpl";
-    public AdvancedWildConfig() { // Return the defaultConfiguration
+    public final String typeImpl;
+
+    public AdvancedWildConfig(String typeImpl) {
+        this.typeImpl = typeImpl;
+    }
+
+    @SuppressWarnings("unused")
+    public AdvancedWildConfig() {
         this(defaultTypeImpl);
     }
 }

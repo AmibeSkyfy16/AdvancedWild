@@ -7,25 +7,24 @@ import java.util.List;
 
 public final class MySpecificImplConfig implements WildImplConfig {
     public static final List<PlayerTimeRange> PLAYER_TIME_RANGES = new ArrayList<>() {{
-        add(new PlayerTimeRange(-2000, 2000, 0));
+        add(new PlayerTimeRange(-10_000, 10_000, 0));
+        add(new PlayerTimeRange(-20_000, 20_000, 3_600_000));
+        add(new PlayerTimeRange(-25_000, 25_000, 7_200_000));
+        add(new PlayerTimeRange(-30_000, 30_000, 14_400_000));
+        add(new PlayerTimeRange(-40_000, 40_000, 864_00_000));
 
-//        add(new PlayerTimeRange(2000, 4000, 3_600_000));
-//        add(new PlayerTimeRange(4000, 6000, 7_200_000));
-//        add(new PlayerTimeRange(6000, 8000, 14_400_000));
-//        add(new PlayerTimeRange(20_000, 40_000, 864_00_000));
-
-        // test only
-        add(new PlayerTimeRange(-4000, 4000, 30_000));
-        add(new PlayerTimeRange(-6000, 6000, 60_000));
-//        add(new PlayerTimeRange(-8000, 8000, 80_000));
-//        add(new PlayerTimeRange(-20_000, 20_000, 90_000));
+        // ******************************** TEST ONLY ******************************** \\
+//        add(new PlayerTimeRange(-500, 500, 0));
+//        add(new PlayerTimeRange(-5000, 5000, 30_000));
+//        add(new PlayerTimeRange(-10_000, 10_000, 60_000));
+//        add(new PlayerTimeRange(-20_000, 20_000, 120_000));
+//        add(new PlayerTimeRange(-40_000, 40_000, 140_000));
     }};
-
     private static final boolean defaultExcludedRange = true;
     private static final boolean defaultShouldContinueAfterAllTimeRangeDid = false;
-    private static final BasedDelay defaultBasedDelay = BasedDelay.REAL_TIME_BASED;
+    private static final BasedDelay defaultBasedDelay = BasedDelay.PLAYER_PLAYTIME_BASED;
 
-    enum BasedDelay{
+    enum BasedDelay {
         PLAYER_PLAYTIME_BASED,
         REAL_TIME_BASED
     }
@@ -42,8 +41,8 @@ public final class MySpecificImplConfig implements WildImplConfig {
         this.basedDelay = basedDelay;
     }
 
-    @SuppressWarnings("unused") // This constructor is used by using reflection
-    public MySpecificImplConfig() { // Return the defaultConfiguration
+    @SuppressWarnings("unused")
+    public MySpecificImplConfig() {
         this(PLAYER_TIME_RANGES, defaultExcludedRange, defaultShouldContinueAfterAllTimeRangeDid, defaultBasedDelay);
     }
 
@@ -53,13 +52,12 @@ public final class MySpecificImplConfig implements WildImplConfig {
         for (PlayerTimeRange playerTimeRange : playerTimeRanges) {
             if (previous != null) {
                 // User enter data in a incorrect order
-                if(previous.min < playerTimeRange.min || previous.max > playerTimeRange.max){
+                if (previous.min < playerTimeRange.min || previous.max > playerTimeRange.max) {
                     return false;
                 }
-                if(previous.delay > playerTimeRange.delay){
+                if (previous.delay > playerTimeRange.delay) {
                     return false;
                 }
-
             }
             previous = playerTimeRange;
         }

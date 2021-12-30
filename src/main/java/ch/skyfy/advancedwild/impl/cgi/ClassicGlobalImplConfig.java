@@ -2,7 +2,7 @@ package ch.skyfy.advancedwild.impl.cgi;
 
 import ch.skyfy.advancedwild.impl.WildImplConfig;
 
-public final class ClassicGlobalConfig implements WildImplConfig {
+public final class ClassicGlobalImplConfig implements WildImplConfig {
     private static final Long defaultPlayerDelayBetweenWild = 60_000L;
     private static final Long defaultGlobalDelayBetweenWild = 60_000L;
     private static final int defaultMaxWild = 5;
@@ -14,7 +14,7 @@ public final class ClassicGlobalConfig implements WildImplConfig {
     public final int min;
     public final int max;
 
-    public ClassicGlobalConfig(Long playerDelayBetweenWild, Long globalDelayBetweenWild, int maximumWild, int min, int max) {
+    public ClassicGlobalImplConfig(Long playerDelayBetweenWild, Long globalDelayBetweenWild, int maximumWild, int min, int max) {
         this.playerDelayBetweenWild = playerDelayBetweenWild;
         this.globalDelayBetweenWild = globalDelayBetweenWild;
         this.maximumWild = maximumWild;
@@ -22,8 +22,8 @@ public final class ClassicGlobalConfig implements WildImplConfig {
         this.max = max;
     }
 
-    @SuppressWarnings("unused") // This constructor is used by using reflection
-    public ClassicGlobalConfig() { // Return the defaultConfiguration
+    @SuppressWarnings("unused")
+    public ClassicGlobalImplConfig() {
         this(defaultPlayerDelayBetweenWild, defaultGlobalDelayBetweenWild, defaultMaxWild, defaultMin, defaultMax);
     }
 

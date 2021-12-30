@@ -2,9 +2,6 @@ package ch.skyfy.advancedwild.impl.cppi;
 
 import ch.skyfy.advancedwild.impl.WildImplConfig;
 
-/**
- *
- */
 public final class ClassicPerPlayerImplConfig implements WildImplConfig {
     private static final Long defaultDelayBetweenWild = 60_000L;
     private static final int defaultMaxWild = 5;
@@ -23,7 +20,7 @@ public final class ClassicPerPlayerImplConfig implements WildImplConfig {
         this.max = max;
     }
 
-    @SuppressWarnings("unused") // This constructor is used by using reflection
+    @SuppressWarnings("unused")
     public ClassicPerPlayerImplConfig() { // Return the defaultConfiguration
         this(defaultDelayBetweenWild, defaultMaxWild, defaultMin, defaultMax);
     }

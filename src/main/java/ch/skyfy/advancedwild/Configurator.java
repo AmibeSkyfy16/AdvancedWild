@@ -3,6 +3,7 @@ package ch.skyfy.advancedwild;
 import ch.skyfy.advancedwild.impl.InvalidDataException;
 import ch.skyfy.advancedwild.impl.WildImpl;
 import ch.skyfy.advancedwild.impl.WildImplConfig;
+import ch.skyfy.advancedwild.impl.WildImplConfigUtils;
 import ch.skyfy.advancedwild.impl.cgi.ClassicGlobalImpl;
 import ch.skyfy.advancedwild.impl.cppi.ClassicPerPlayerImpl;
 import ch.skyfy.advancedwild.impl.msi.MySpecificImpl;
@@ -45,11 +46,13 @@ public class Configurator {
 
     public WildImpl<? extends WildImplConfig> wildImpl;
 
+    @SuppressWarnings("ConstantConditions")
     public Configurator() {
-        var defaultAdvancedWildConfig = new AdvancedWildConfig();
+
         try {
-            var choseImplType = type2.get(defaultAdvancedWildConfig.typeImpl());
-            wildImpl = JsonUtils.createOrGetConfig(defaultAdvancedWildConfig.typeImpl(), choseImplType);
+            var defaultAdvancedWildConfig = JsonUtils.createOrGetConfig("config.json", AdvancedWildConfig.class);
+            var choseImplType = type2.get(defaultAdvancedWildConfig.typeImpl);
+            wildImpl = WildImplConfigUtils.createOrGetConfig(defaultAdvancedWildConfig.typeImpl, choseImplType);
         } catch (InvalidDataException | NullPointerException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException e) {
             e.printStackTrace();
             System.out.println("\n[Advanced Wilds] An error occured");

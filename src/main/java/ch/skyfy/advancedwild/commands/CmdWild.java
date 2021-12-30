@@ -6,15 +6,12 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 
 public class CmdWild {
-
     static {
         Configurator.getInstance().wildImpl.registerEvents();
     }
-
     public static void registerWildCommand(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(CommandManager.literal("wild").executes(context -> {
             return Configurator.getInstance().wildImpl.implement(context);
         }));
     }
-
 }

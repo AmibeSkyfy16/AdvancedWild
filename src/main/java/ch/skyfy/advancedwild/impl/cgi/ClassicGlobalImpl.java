@@ -14,11 +14,11 @@ import net.minecraft.server.command.ServerCommandSource;
  * The range of the /wild                                                   -> default: between -5000 and 5000
  * The maximum number of /wild commands a player can do                     -> default: 5
  */
-public class ClassicGlobalImpl extends WildImpl<ClassicGlobalConfig> {
+public class ClassicGlobalImpl extends WildImpl<ClassicGlobalImplConfig> {
 
-    private final ClassicGlobalConfig classicGlobalConfig;
+    private final ClassicGlobalImplConfig classicGlobalConfig;
 
-    public ClassicGlobalImpl(ClassicGlobalConfig config) {
+    public ClassicGlobalImpl(ClassicGlobalImplConfig config) {
         classicGlobalConfig = config;
     }
 

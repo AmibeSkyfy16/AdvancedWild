@@ -1,5 +1,6 @@
 package ch.skyfy.advancedwild.impl.msi;
 
+@SuppressWarnings("ClassCanBeRecord")
 public final class PlayerTimeRange {
     public final int min;
     public final int max;
