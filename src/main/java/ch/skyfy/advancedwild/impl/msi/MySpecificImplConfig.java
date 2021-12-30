@@ -2,7 +2,6 @@ package ch.skyfy.advancedwild.impl.msi;
 
 import ch.skyfy.advancedwild.impl.WildImplConfig;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,32 +15,37 @@ public final class MySpecificImplConfig implements WildImplConfig {
 //        add(new PlayerTimeRange(20_000, 40_000, 864_00_000));
 
         // test only
-        add(new PlayerTimeRange(-4000, 4000, 20_000));
+        add(new PlayerTimeRange(-4000, 4000, 30_000));
         add(new PlayerTimeRange(-6000, 6000, 60_000));
-        add(new PlayerTimeRange(-8000, 8000, 80_000));
-        add(new PlayerTimeRange(-20_000, 20_000, 90_000));
+//        add(new PlayerTimeRange(-8000, 8000, 80_000));
+//        add(new PlayerTimeRange(-20_000, 20_000, 90_000));
     }};
 
     private static final boolean defaultExcludedRange = true;
-    private static final boolean defaultShouldContinueAfterAllTimeRangeDid = true;
+    private static final boolean defaultShouldContinueAfterAllTimeRangeDid = false;
+    private static final BasedDelay defaultBasedDelay = BasedDelay.REAL_TIME_BASED;
+
+    enum BasedDelay{
+        PLAYER_PLAYTIME_BASED,
+        REAL_TIME_BASED
+    }
 
     public final List<PlayerTimeRange> playerTimeRanges;
     public final boolean excludedRange;
     public final boolean shouldContinueAfterAllTimeRangeDid;
+    public final BasedDelay basedDelay;
 
-
-    public MySpecificImplConfig(List<PlayerTimeRange> playerTimeRanges, boolean excludedRange, boolean shouldContinueAfterAllTimeRangeDid) {
+    public MySpecificImplConfig(List<PlayerTimeRange> playerTimeRanges, boolean excludedRange, boolean shouldContinueAfterAllTimeRangeDid, BasedDelay basedDelay) {
         this.playerTimeRanges = playerTimeRanges;
         this.excludedRange = excludedRange;
         this.shouldContinueAfterAllTimeRangeDid = shouldContinueAfterAllTimeRangeDid;
+        this.basedDelay = basedDelay;
     }
 
     @SuppressWarnings("unused") // This constructor is used by using reflection
     public MySpecificImplConfig() { // Return the defaultConfiguration
-        this(PLAYER_TIME_RANGES, defaultExcludedRange, defaultShouldContinueAfterAllTimeRangeDid);
-        System.out.println("CALLED MySpecificImplConfig default");
+        this(PLAYER_TIME_RANGES, defaultExcludedRange, defaultShouldContinueAfterAllTimeRangeDid, defaultBasedDelay);
     }
-
 
     @Override
     public boolean isValid() {
@@ -61,4 +65,5 @@ public final class MySpecificImplConfig implements WildImplConfig {
         }
         return true;
     }
+
 }

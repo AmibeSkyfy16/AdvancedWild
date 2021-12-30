@@ -1,6 +1,7 @@
 package ch.skyfy.advancedwild.impl.msi;
 
 import ch.skyfy.advancedwild.AdvancedWild;
+import ch.skyfy.advancedwild.feature.PlayerTimeMeter;
 import ch.skyfy.advancedwild.impl.WildImpl;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.context.CommandContext;
@@ -32,6 +33,10 @@ import static ch.skyfy.advancedwild.AdvancedWild.MOD_CONFIG_DIR;
  * The player time range                        -> A list of delay and range
  * The excludedRange                            -> If it is necessary to exclude the row of the previous index from the list<PlayerTimeRanges> when calculating the new random appearance point
  * The shouldContinueAfterAllTimeRangeDid       -> if the player will still be able to use /wild after using the number of times == to the size of the list<PlayerTimeRanges>
+ * The basedDelay                               -> Two value available, either PLAYER_PLAYTIME_BASED or REAL_TIME_BASED
+ * <p>
+ * PLAYER_PLAYTIME_BASED mean /wild command is based on player total time on the server
+ * REAL_TIME_BASED mean /wild command is based on normal time in real life
  */
 public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
 
@@ -41,19 +46,12 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
 
     private final List<PlayerWild> playerWilds;
 
-
     private final Random randomizer;
 
     public MySpecificImpl(MySpecificImplConfig config) {
         mySpecificImplConfig = config;
         playerTimeRanges = config.playerTimeRanges;
         playerWilds = readPlayersFromNbt();
-
-        System.out.println("Debug printing list without sort");
-        playerTimeRanges.forEach(playerTimeRange -> System.out.println(playerTimeRange.delay));
-//        var gtrs = Configurator.getInstance().wildConfig.globalTimeRanges;
-//        gtrs.sort((o1, o2) -> Integer.compare(o2.count(), o1.count()));
-
         randomizer = new Random();
     }
 
@@ -71,8 +69,8 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                 var z = randomizer.nextDouble(range.min, range.max + 1);
                 player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, 1800, 1)); // I will change with a mixin
                 player.teleport(x, 320, z);
-
                 playerWilds.add(new PlayerWild(player.getUuidAsString(), System.currentTimeMillis(), 1));
+                savePlayersToNbt(player.getUuidAsString());
             } else {
                 @SuppressWarnings("OptionalGetWithoutIsPresent") var playerWild = playerWilds.stream().filter(playerWild1 -> playerWild1.uuid.equals(player.getUuidAsString())).findFirst().get();
 
@@ -85,7 +83,7 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                         range = playerTimeRanges.get(playerTimeRanges.size() - 1);
                         previousRange = playerTimeRanges.get(playerTimeRanges.size() - 1 - 1);
                     } else {
-                        player.sendMessage(Text.of("I have used your all /wild command"), false);
+                        player.sendMessage(Text.of("You have used your all /wild command"), false);
                         return Command.SINGLE_SUCCESS;
                     }
                 } else {
@@ -93,7 +91,13 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                     previousRange = playerTimeRanges.get(playerWild.count - 1);
                 }
 
-                if (System.currentTimeMillis() - playerWild.startTime < range.delay) {
+                Long elapsed;
+                if (mySpecificImplConfig.basedDelay == MySpecificImplConfig.BasedDelay.PLAYER_PLAYTIME_BASED)
+                    elapsed = PlayerTimeMeter.getInstance().getTime(playerWild.uuid);
+                else
+                    elapsed = System.currentTimeMillis() - playerWild.startTime;
+
+                if (elapsed < range.delay) {
                     player.sendMessage(Text.of("You have to wait more bedore use /wild"), false);
                     return Command.SINGLE_SUCCESS;
                 }
@@ -105,9 +109,11 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
                     vec = new Vec3i(randomizer.nextInt(range.min, range.max), 320, randomizer.nextInt(range.min, range.max));
                 }
 
+                playerWild.count++;
                 playerWild.startTime = System.currentTimeMillis();
-                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, 1800, 1)); // I will change with a mixin
+                player.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOW_FALLING, 1200, 1)); // I will change with a mixin
                 player.teleport(vec.getX(), vec.getY(), vec.getZ());
+                savePlayersToNbt(playerWild.uuid);
             }
 
         } catch (CommandSyntaxException e) {
@@ -120,7 +126,7 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
     @Override
     public void registerEvents() {
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
-            savePlayersToNbt();
+            playerWilds.forEach(playerWild -> savePlayersToNbt(playerWild.uuid));
         });
     }
 
@@ -131,9 +137,11 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
             x = randomizer.nextInt(range.min, range.max);
             z = randomizer.nextInt(range.min, range.max);
 
-            if((x <= previous.min || x >= previous.max) && (z <= previous.min || z >= previous.max))
+            if ((x <= previous.min || x >= previous.max) && (z <= previous.min || z >= previous.max))
                 foundCorrectRandom = true;
         } while (!foundCorrectRandom);
+        System.out.println("previous was : " + previous.min + " / " + previous.max);
+        System.out.println("random are : " + x + "  /  " + z );
         return new Vec3i(x, 320, z);
     }
 
@@ -157,35 +165,29 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private void savePlayersToNbt() {
+    private void savePlayersToNbt(String uuid) {
         var file = MOD_CONFIG_DIR.resolve("mySpecificImplData").toFile();
-        if (file.exists()) {
-            try {
-                var nbt = NbtIo.read(file);
-                for (var playerWild : playerWilds) {
-                    var data = (NbtCompound) nbt.get(playerWild.uuid);
-                    data.putLong("startTime", playerWild.startTime);
-                    data.putInt("count", playerWild.count);
-                    nbt.put(playerWild.uuid, data);
+        playerWilds.stream().filter(playerWild -> playerWild.uuid.equals(uuid)).findFirst().ifPresent(playerWild -> {
+            NbtCompound nbt;
+            if(file.exists()){
+                try {
+                    nbt = NbtIo.read(file);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
                 }
-                NbtIo.write(nbt, file);
-            } catch (IOException | NullPointerException e) {
-                e.printStackTrace();
+            }else{
+                nbt = new NbtCompound();
             }
-        } else {
-            var nbt = new NbtCompound();
-            for (var playerWild : playerWilds) {
-                var data = new NbtCompound();
-                data.putLong("startTime", playerWild.startTime);
-                data.putInt("count", playerWild.count);
-                nbt.put(playerWild.uuid, data);
-            }
+            var data = new NbtCompound();
+            data.putLong("startTime", playerWild.startTime);
+            data.putInt("count", playerWild.count);
+            nbt.put(playerWild.uuid, data);
             try {
                 NbtIo.write(nbt, file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
+        });
     }
-
 }

@@ -1,6 +1,8 @@
 package ch.skyfy.advancedwild;
 
 import ch.skyfy.advancedwild.commands.CmdWild;
+import ch.skyfy.advancedwild.feature.PlayerTimeMeter;
+import ch.skyfy.advancedwild.impl.msi.PlayerTimeRange;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -25,6 +27,7 @@ public class AdvancedWild implements ModInitializer {
     public void onInitialize() {
         if (createConfigDir()) return;
         Configurator.initialize();
+        PlayerTimeMeter.initialize();
         if(DISABLED.get())return; // If an error occured in Configurator.initialize() DISABLED will be true, and mod will don't run anymore
         registerCommand();
         registerEvents();

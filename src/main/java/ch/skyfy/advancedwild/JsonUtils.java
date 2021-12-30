@@ -21,13 +21,13 @@ public class JsonUtils {
 
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-    public static <R extends WildImplConfig> R getConfig(File file, Type type) throws IOException {
+    public static <R extends WildImplConfig> R get(File file, Type type) throws IOException {
         try (var reader = new FileReader(file)) {
             return gson.fromJson(reader, type);
         }
     }
 
-    public static <R extends WildImplConfig> void saveRewards(File file, Type type, R r) throws IOException {
+    public static <R extends WildImplConfig> void save(File file, Type type, R r) throws IOException {
         try (var writer = new FileWriter(file)) {
             gson.toJson(r, type, writer);
         }
@@ -39,9 +39,9 @@ public class JsonUtils {
         if (type instanceof Class<?> cclass) {
             WildImplConfig wildConfig = (WildImplConfig) cclass.getConstructor().newInstance();
             if (advancedWildConfigFile.exists()) {
-                wildConfig = getConfig(advancedWildConfigFile, type);
+                wildConfig = get(advancedWildConfigFile, type);
             } else {
-                saveRewards(advancedWildConfigFile, type, wildConfig);
+                save(advancedWildConfigFile, type, wildConfig);
             }
             if(!wildConfig.isValid())throw new InvalidDataException();
             return wildImplClass.getConstructor(cclass).newInstance(wildConfig);
