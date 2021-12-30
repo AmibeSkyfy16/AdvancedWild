@@ -26,4 +26,9 @@ public final class ClassicGlobalConfig implements WildImplConfig {
     public ClassicGlobalConfig() { // Return the defaultConfiguration
         this(defaultPlayerDelayBetweenWild, defaultGlobalDelayBetweenWild, defaultMaxWild, defaultMin, defaultMax);
     }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 }

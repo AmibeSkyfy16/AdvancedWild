@@ -1,9 +1,10 @@
 package ch.skyfy.advancedwild;
 
-import ch.skyfy.advancedwild.impl.cgi.ClassicGlobalImpl;
-import ch.skyfy.advancedwild.impl.cppi.ClassicPerPlayerImpl;
+import ch.skyfy.advancedwild.impl.InvalidDataException;
 import ch.skyfy.advancedwild.impl.WildImpl;
 import ch.skyfy.advancedwild.impl.WildImplConfig;
+import ch.skyfy.advancedwild.impl.cgi.ClassicGlobalImpl;
+import ch.skyfy.advancedwild.impl.cppi.ClassicPerPlayerImpl;
 import ch.skyfy.advancedwild.impl.msi.MySpecificImpl;
 
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class Configurator {
         try {
             var choseImplType = type2.get(defaultAdvancedWildConfig.typeImpl());
             wildImpl = JsonUtils.createOrGetConfig(defaultAdvancedWildConfig.typeImpl(), choseImplType);
-        } catch (NullPointerException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException e) {
+        } catch (InvalidDataException | NullPointerException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException e) {
             e.printStackTrace();
             System.out.println("\n[Advanced Wilds] An error occured");
             System.out.println("[Advanced Wilds] Please check if key value in config.json file are one of this.");

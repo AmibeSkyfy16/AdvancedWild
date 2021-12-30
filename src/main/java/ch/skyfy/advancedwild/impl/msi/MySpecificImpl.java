@@ -131,10 +131,8 @@ public class MySpecificImpl extends WildImpl<MySpecificImplConfig> {
             x = randomizer.nextInt(range.min, range.max);
             z = randomizer.nextInt(range.min, range.max);
 
-            if (x <= previous.min && x <= previous.max ||
-                    z <= previous.min && z <= previous.max) continue;
-
-            foundCorrectRandom = true;
+            if((x <= previous.min || x >= previous.max) && (z <= previous.min || z >= previous.max))
+                foundCorrectRandom = true;
         } while (!foundCorrectRandom);
         return new Vec3i(x, 320, z);
     }

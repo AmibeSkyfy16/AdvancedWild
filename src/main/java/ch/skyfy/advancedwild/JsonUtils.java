@@ -1,5 +1,6 @@
 package ch.skyfy.advancedwild;
 
+import ch.skyfy.advancedwild.impl.InvalidDataException;
 import ch.skyfy.advancedwild.impl.WildImpl;
 import ch.skyfy.advancedwild.impl.WildImplConfig;
 import com.google.gson.Gson;
@@ -32,16 +33,17 @@ public class JsonUtils {
         }
     }
 
-    public static @Nullable <R extends WildImpl<? extends WildImplConfig>> R createOrGetConfig(String fileName, Class<R> wildImplClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException {
+    public static @Nullable <R extends WildImpl<? extends WildImplConfig>> R createOrGetConfig(String fileName, Class<R> wildImplClass) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, IOException, InvalidDataException {
         var advancedWildConfigFile = MOD_CONFIG_DIR.resolve(fileName + ".json").toFile();
         var type = ((ParameterizedType) wildImplClass.getGenericSuperclass()).getActualTypeArguments()[0];
         if (type instanceof Class<?> cclass) {
-            var wildConfig = (WildImplConfig) cclass.getConstructor().newInstance();
+            WildImplConfig wildConfig = (WildImplConfig) cclass.getConstructor().newInstance();
             if (advancedWildConfigFile.exists()) {
                 wildConfig = getConfig(advancedWildConfigFile, type);
             } else {
                 saveRewards(advancedWildConfigFile, type, wildConfig);
             }
+            if(!wildConfig.isValid())throw new InvalidDataException();
             return wildImplClass.getConstructor(cclass).newInstance(wildConfig);
         }
         return null;

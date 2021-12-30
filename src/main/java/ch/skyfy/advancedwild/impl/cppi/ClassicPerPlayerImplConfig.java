@@ -27,4 +27,9 @@ public final class ClassicPerPlayerImplConfig implements WildImplConfig {
     public ClassicPerPlayerImplConfig() { // Return the defaultConfiguration
         this(defaultDelayBetweenWild, defaultMaxWild, defaultMin, defaultMax);
     }
+
+    @Override
+    public boolean isValid() {
+        return true;
+    }
 }
