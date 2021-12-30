@@ -2,6 +2,7 @@ import ch.skyfy.advancedwild.impl.cppi.ClassicPerPlayerImpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 
 public class Test {
 
@@ -9,7 +10,6 @@ public class Test {
     @org.junit.jupiter.api.Test
     public void test3() {
         if(0 == 0)return;
-
         var r = ((ParameterizedType) ClassicPerPlayerImpl.class.getGenericSuperclass()).getActualTypeArguments()[0];
 
         if (r instanceof Class<?> cclass) {

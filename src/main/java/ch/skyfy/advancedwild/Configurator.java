@@ -49,7 +49,6 @@ public class Configurator {
         try {
             var choseImplType = type2.get(defaultAdvancedWildConfig.typeImpl());
             wildImpl = JsonUtils.createOrGetConfig(defaultAdvancedWildConfig.typeImpl(), choseImplType);
-            System.out.println();
         } catch (NullPointerException | NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | IOException e) {
             e.printStackTrace();
             System.out.println("\n[Advanced Wilds] An error occured");

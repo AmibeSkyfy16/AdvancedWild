@@ -7,7 +7,7 @@ import net.minecraft.server.command.ServerCommandSource;
 
 /**
  * Implementation of a classic wild command
- *
+ * <p>
  * There are three things that can be configured
  * The delay between two /wild commands                      -> default: 60 secondes
  * The range of the /wild                                    -> default: between -5000 and 5000
@@ -23,10 +23,10 @@ public class ClassicPerPlayerImpl extends WildImpl<ClassicPerPlayerImplConfig> {
 
     @Override
     public int implement(CommandContext<ServerCommandSource> context) {
-        var delay = classicPerPlayerImplConfig.delayBetweenWild();
-        var maximumWild = classicPerPlayerImplConfig.maximumWild();
-        var min = classicPerPlayerImplConfig.min();
-        var max = classicPerPlayerImplConfig.max();
+        var delay = classicPerPlayerImplConfig.delayBetweenWild;
+        var maximumWild = classicPerPlayerImplConfig.maximumWild;
+        var min = classicPerPlayerImplConfig.min;
+        var max = classicPerPlayerImplConfig.max;
         // TODO do
         return Command.SINGLE_SUCCESS;
     }
