@@ -7,11 +7,11 @@ import java.util.List;
 
 public final class MySpecificImplConfig implements WildImplConfig {
     public static final List<PlayerTimeRange> PLAYER_TIME_RANGES = new ArrayList<>() {{
-        add(new PlayerTimeRange(-10_000, 10_000, 0));
-        add(new PlayerTimeRange(-20_000, 20_000, 3_600_000));
-        add(new PlayerTimeRange(-25_000, 25_000, 7_200_000));
-        add(new PlayerTimeRange(-30_000, 30_000, 14_400_000));
-        add(new PlayerTimeRange(-40_000, 40_000, 864_00_000));
+        add(new PlayerTimeRange(-5_000, 5_000, 0));
+        add(new PlayerTimeRange(-6_000, 6_000, 3_600_000));
+        add(new PlayerTimeRange(-7_000, 7_000, 7_200_000));
+        add(new PlayerTimeRange(-10_000, 10_000, 14_400_000));
+        add(new PlayerTimeRange(-20_000, 20_000, 864_00_000));
 
         // ******************************** TEST ONLY ******************************** \\
 //        add(new PlayerTimeRange(-500, 500, 0));
